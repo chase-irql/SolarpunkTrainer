@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37216.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SolarpunkTrainer", "SolarpunkTrainer\SolarpunkTrainer.vcxproj", "{D14AF749-B118-4F57-BDF5-74010776526F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SolarpunkLoader", "SolarpunkLoader\SolarpunkLoader.vcxproj", "{A8B83E92-B953-4B67-A0B6-133A9C82FE20}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D14AF749-B118-4F57-BDF5-74010776526F}.Debug|x64.ActiveCfg = Debug|x64
+		{D14AF749-B118-4F57-BDF5-74010776526F}.Debug|x64.Build.0 = Debug|x64
+		{D14AF749-B118-4F57-BDF5-74010776526F}.Debug|x86.ActiveCfg = Debug|Win32
+		{D14AF749-B118-4F57-BDF5-74010776526F}.Debug|x86.Build.0 = Debug|Win32
+		{D14AF749-B118-4F57-BDF5-74010776526F}.Release|x64.ActiveCfg = Release|x64
+		{D14AF749-B118-4F57-BDF5-74010776526F}.Release|x64.Build.0 = Release|x64
+		{D14AF749-B118-4F57-BDF5-74010776526F}.Release|x86.ActiveCfg = Release|Win32
+		{D14AF749-B118-4F57-BDF5-74010776526F}.Release|x86.Build.0 = Release|Win32
+		{A8B83E92-B953-4B67-A0B6-133A9C82FE20}.Debug|x64.ActiveCfg = Debug|x64
+		{A8B83E92-B953-4B67-A0B6-133A9C82FE20}.Debug|x64.Build.0 = Debug|x64
+		{A8B83E92-B953-4B67-A0B6-133A9C82FE20}.Debug|x86.ActiveCfg = Debug|x64
+		{A8B83E92-B953-4B67-A0B6-133A9C82FE20}.Release|x64.ActiveCfg = Release|x64
+		{A8B83E92-B953-4B67-A0B6-133A9C82FE20}.Release|x64.Build.0 = Release|x64
+		{A8B83E92-B953-4B67-A0B6-133A9C82FE20}.Release|x86.ActiveCfg = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2214A863-68F4-409A-9171-715AA5734D05}
+	EndGlobalSection
+EndGlobal
