@@ -74,3 +74,15 @@ Source: <https://github.com/rsms/inter>
 Copyright (c) 2016 The Inter Project Authors. Distributed under the SIL Open
 Font License 1.1; the complete license is included at
 `SolarpunkTrainer/assets/fonts/LICENSE.txt`.
+
+## Dumper-7 build dependency
+
+Source: <https://github.com/Encryqed/Dumper-7>
+
+The schema-probe build helper fetches the exact upstream commit
+`3a849bb838422bea5cf417447d00a99549d932cf` into the ignored `.deps` directory.
+Dumper-7 source is not vendored or sublicensed by this repository, and the
+upstream project did not declare a license at the pinned revision. Review its
+repository terms before redistributing a compiled schema probe. The
+Solarpunk-specific patch and overlay under `schema_probe` remain covered by
+this repository's MIT License.

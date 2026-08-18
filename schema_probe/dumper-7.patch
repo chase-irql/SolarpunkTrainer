@@ -1,0 +1,191 @@
+diff --git a/Dumper/Dumper.vcxproj b/Dumper/Dumper.vcxproj
+index f1e262e..0646018 100644
+--- a/Dumper/Dumper.vcxproj
++++ b/Dumper/Dumper.vcxproj
+@@ -46,7 +46,7 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseDebugLibraries>true</UseDebugLibraries>
+-    <PlatformToolset>v142</PlatformToolset>
++    <PlatformToolset>v143</PlatformToolset>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Clang|Win32'" Label="Configuration">
+@@ -58,7 +58,7 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseDebugLibraries>false</UseDebugLibraries>
+-    <PlatformToolset>v142</PlatformToolset>
++    <PlatformToolset>v143</PlatformToolset>
+     <WholeProgramOptimization>true</WholeProgramOptimization>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+@@ -72,7 +72,7 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseDebugLibraries>true</UseDebugLibraries>
+-    <PlatformToolset>v142</PlatformToolset>
++    <PlatformToolset>v143</PlatformToolset>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Clang|x64'" Label="Configuration">
+@@ -84,7 +84,7 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseDebugLibraries>false</UseDebugLibraries>
+-    <PlatformToolset>v142</PlatformToolset>
++    <PlatformToolset>v143</PlatformToolset>
+     <WholeProgramOptimization>true</WholeProgramOptimization>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+@@ -123,7 +123,19 @@
+   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-Clang|x64'" Label="PropertySheets">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+   </ImportGroup>
+-  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup Condition="'$(SchemaProbe)'=='true'">
++    <TargetName>SolarpunkSchemaProbe</TargetName>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(SchemaProbe)'=='true'">
++    <ClCompile>
++      <PreprocessorDefinitions>DUMPER7_SCHEMA_PROBE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
++    </ClCompile>
++    <Link>
++      <AdditionalDependencies>bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
++    </Link>
++  </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <ClCompile>
+       <WarningLevel>Level3</WarningLevel>
+@@ -315,7 +327,8 @@
+     <ClCompile Include="Generator\Private\Wrappers\EnumWrapper.cpp" />
+     <ClCompile Include="Generator\Private\Generators\Generator.cpp" />
+     <ClCompile Include="Generator\Private\HashStringTable.cpp" />
+-    <ClCompile Include="Main.cpp" />
++    <ClCompile Include="Main.cpp" />
++    <ClCompile Include="RuntimeSchema.cpp" />
+     <ClCompile Include="Generator\Private\Generators\MappingGenerator.cpp" />
+     <ClCompile Include="Generator\Private\Wrappers\MemberWrappers.cpp" />
+     <ClCompile Include="Generator\Private\Managers\CollisionManager.cpp" />
+@@ -351,7 +364,8 @@
+     <ClInclude Include="Generator\Public\Managers\MemberManager.h" />
+     <ClInclude Include="Generator\Public\Managers\PackageManager.h" />
+     <ClInclude Include="Generator\Public\PredefinedMembers.h" />
+-    <ClInclude Include="Settings.h" />
++    <ClInclude Include="Settings.h" />
++    <ClInclude Include="RuntimeSchema.h" />
+     <ClInclude Include="Generator\Public\Managers\StructManager.h" />
+     <ClInclude Include="Engine\Public\Unreal\NameArray.h" />
+     <ClInclude Include="Utils\Encoding\UnicodeNames.h" />
+diff --git a/Dumper/Engine/Private/Unreal/NameArray.cpp b/Dumper/Engine/Private/Unreal/NameArray.cpp
+index ff3ec91..e1f18fe 100644
+--- a/Dumper/Engine/Private/Unreal/NameArray.cpp
++++ b/Dumper/Engine/Private/Unreal/NameArray.cpp
+@@ -423,6 +423,42 @@ bool NameArray::TryFindNamePool_Windows()
+ 
+ 	// TODO (encryqed): Fix this below for 32-bit ue games ig?
+ 
++#if defined(_WIN64)
++	/*
++	 * UE5.7 emits a compact GetNamePool accessor before the constructor
++	 * reference used by the older discovery path:
++	 *
++	 *   cmp  byte ptr [initialized], 0
++	 *   je   construct
++	 *   lea  rax, [NamePool]
++	 *   ...
++	 *   lea  rcx, [NamePool]
++	 *   call FNamePool::FNamePool
++	 *
++	 * Resolve the first LEA directly. This is intentionally a fallback
++	 * signature for an engine code shape, not a game-specific RVA.
++	 */
++	constexpr const char* GetNamePoolAccessorSignature =
++		"48 83 EC 28 80 3D ? ? ? ? 00 74 ? "
++		"48 8D 05 ? ? ? ? EB ? 48 8D 0D ? ? ? ? E8";
++	constexpr uint32 GetNamePoolLeaDisplacementOffset = 0x10;
++
++	if (void* AccessorNamePool = Platform::FindPattern(
++		GetNamePoolAccessorSignature,
++		GetNamePoolLeaDisplacementOffset))
++	{
++		const uintptr_t Address =
++			reinterpret_cast<uintptr_t>(AccessorNamePool);
++		if (Platform::IsAddressInProcessRange(Address)
++			&& !Platform::IsBadReadPtr(AccessorNamePool))
++		{
++			Off::InSDK::NameArray::GNames =
++				Platform::GetOffset(Address);
++			return true;
++		}
++	}
++#endif
++
+ 	/* Number of bytes we want to search for an indirect call to InitializeSRWLock */
+ 	constexpr int32 InitSRWLockSearchRange = 0x50;
+ 
+diff --git a/Dumper/main.cpp b/Dumper/main.cpp
+index 5e6ac4d..e24d3a9 100644
+--- a/Dumper/main.cpp
++++ b/Dumper/main.cpp
+@@ -9,6 +9,7 @@
+ #include "Generators/DumpspaceGenerator.h"
+ 
+ #include "Generators/Generator.h"
++#include "RuntimeSchema.h"
+ 
+ enum class EFortToastType : uint8
+ {
+@@ -21,6 +22,26 @@ enum class EFortToastType : uint8
+ 
+ DWORD MainThread(HMODULE Module)
+ {
++#ifdef DUMPER7_SCHEMA_PROBE
++	DisableThreadLibraryCalls(Module);
++
++	bool succeeded = false;
++	try
++	{
++		Generator::InitEngineCore();
++		succeeded =
++			!RuntimeSchema::WriteLocalCache().empty();
++	}
++	catch (...)
++	{
++		succeeded = false;
++	}
++
++	FreeLibraryAndExitThread(
++		Module,
++		succeeded ? 0 : 1);
++	return 0;
++#else
+ 	AllocConsole();
+ 	FILE* Dummy;
+ 	freopen_s(&Dummy, "CONIN$", "r", stdin);
+@@ -38,6 +59,7 @@ DWORD MainThread(HMODULE Module)
+ 
+ 	Generator::InitEngineCore();
+ 	Generator::InitInternal();
++	RuntimeSchema::WriteLocalCache();
+ 
+ 	if (Settings::Generator::GameName.empty() && Settings::Generator::GameVersion.empty())
+ 	{
+@@ -97,6 +119,7 @@ DWORD MainThread(HMODULE Module)
+ 	}
+ 
+ 	return 0;
++#endif
+ }
+ 
+ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
+@@ -104,6 +127,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
+ 	switch (reason)
+ 	{
+ 	case DLL_PROCESS_ATTACH:
++		DisableThreadLibraryCalls(hModule);
+ 		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)MainThread, hModule, 0, 0);
+ 		break;
+ 	}

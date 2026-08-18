@@ -104,5 +104,10 @@
     <None Include="..\SolarpunkTrainer\assets\fonts\LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="BuildSolarpunkSchemaProbe"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(Platform)'=='x64' and '$(BuildSchemaProbe)'!='false'">
+    <Exec Command="powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\scripts\build-schema-probe.ps1&quot; -Configuration &quot;$(Configuration)&quot; -Platform &quot;$(Platform)&quot; -OutDir &quot;$(ProjectDir)..\x64\$(Configuration)&quot; -MSBuildPath &quot;$(MSBuildToolsPath)\MSBuild.exe&quot;" />
+  </Target>
   <ImportGroup Label="ExtensionTargets" />
 </Project>

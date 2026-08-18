@@ -51,15 +51,16 @@ There are no HTTP requests in this flow.
 
 ## Build artifacts
 
-`Release|x64` produces two files in `x64/Release`:
+`Release|x64` produces three files in `x64/Release`:
 
 - `SolarpunkLoader.exe`
+- `SolarpunkSchemaProbe.dll`
 - `SolarpunkTrainer.dll`
 
-The public repository does not include or build the optional schema probe. A
-compatible `SolarpunkSchemaProbe.dll` may be supplied beside the loader to
-analyze an unknown game build. If neither that probe nor an exact validated
-cache exists, the loader stays disabled rather than using stale data.
+The loader project builds the probe automatically. On the first build, the
+build helper fetches a pinned Dumper-7 revision into the ignored `.deps`
+directory and applies the repository's schema-only overlay. A missing probe or
+failed probe build is a build error rather than a silent fallback.
 
 ## Exact build identity
 
@@ -81,8 +82,8 @@ Steam label from selecting the wrong schema.
 
 ## Local analyzer
 
-A compatible `SolarpunkSchemaProbe.dll` is a short-lived local analyzer. The
-original development version used a modified Dumper-7 build to:
+`SolarpunkSchemaProbe.dll` is a short-lived local analyzer built from the
+pinned Dumper-7 revision and this repository's overlay. It:
 
 1. Locates `GUObjectArray`.
 2. Locates and initializes the UE5 name pool.

@@ -15,12 +15,10 @@ documentation, or maintainability are welcome.
 
 ## Build and verify
 
-Initialize submodules and build the release configuration from a Visual Studio
-2022 Developer PowerShell:
+Build the release configuration from PowerShell:
 
 ```powershell
-git submodule update --init --recursive
-msbuild SolarpunkTrainer.sln /m /p:Configuration=Release /p:Platform=x64
+.\build.ps1
 ```
 
 Describe any manual game-build testing in the pull request. Never test

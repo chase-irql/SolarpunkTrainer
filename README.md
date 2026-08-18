@@ -35,32 +35,35 @@ design and its limits.
 - Windows 10 or 11, x64
 - Visual Studio 2022 with **Desktop development with C++** and the Windows SDK
 - Git with submodule support
+- Internet access on the first build to fetch a pinned Dumper-7 revision
 - A legitimately installed copy of Solarpunk
 
 ## Build
 
-Clone the repository and its pinned JSON dependency:
+Clone the repository, then run the build helper from PowerShell:
 
 ```powershell
-git clone --recurse-submodules https://github.com/chase-irql/SolarpunkTrainer.git
+git clone https://github.com/chase-irql/SolarpunkTrainer.git
 cd SolarpunkTrainer
-msbuild SolarpunkTrainer.sln /m /p:Configuration=Release /p:Platform=x64
+.\build.ps1
 ```
 
-If you cloned without submodules, run `git submodule update --init --recursive`
-before building. Release outputs are written to `x64/Release`:
+The helper locates Visual Studio, initializes the pinned JSON submodule, and
+builds the complete x64 solution. Release outputs are written to `x64/Release`:
 
 ```text
 SolarpunkLoader.exe
+SolarpunkSchemaProbe.dll
 SolarpunkTrainer.dll
 ```
 
-The public repository does not include a runtime schema generator. To analyze
-an unknown game build automatically, place a compatible
-`SolarpunkSchemaProbe.dll` beside the two build outputs. Without a probe or an
-already validated local schema, the loader remains disabled. The expected
-schema and validation rules are documented in
-[docs/AUTO_UPDATE_ARCHITECTURE.md](docs/AUTO_UPDATE_ARCHITECTURE.md).
+The loader build automatically fetches a pinned Dumper-7 revision, applies the
+project's schema-only overlay, and builds `SolarpunkSchemaProbe.dll`. Upstream
+source is cached under the ignored `.deps` directory and is not vendored in
+this repository. Set `/p:BuildSchemaProbe=false` only when intentionally
+building without automatic unknown-build analysis. See
+[schema_probe/README.md](schema_probe/README.md) for provenance and maintenance
+details.
 
 ## Use
 

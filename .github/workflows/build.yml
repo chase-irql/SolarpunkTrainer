@@ -18,8 +18,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v3
-
       - name: Build release
-        run: msbuild SolarpunkTrainer.sln /m /p:Configuration=Release /p:Platform=x64
+        shell: powershell
+        run: .\build.ps1

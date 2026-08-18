@@ -12,13 +12,13 @@ release output contains:
 
 ```text
 x64/Release/SolarpunkLoader.exe
+x64/Release/SolarpunkSchemaProbe.dll
 x64/Release/SolarpunkTrainer.dll
 ```
 
-The public repository does not include or build a schema probe. A compatible
-`SolarpunkSchemaProbe.dll` can be placed beside these files to analyze unknown
-game builds. Without a probe or an already validated cached schema, the loader
-remains disabled.
+The first build fetches a pinned Dumper-7 revision, applies the repository's
+schema-only overlay, and produces `SolarpunkSchemaProbe.dll` beside the loader
+and trainer. The upstream checkout is cached under `.deps`.
 
 ## Runtime behavior
 

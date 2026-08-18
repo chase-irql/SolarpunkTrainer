@@ -371,6 +371,7 @@ imgui.ini
 /schemas/
 runtime-schema.json
 **/SchemaCache/
+/.deps/
 
 # CMake
 out/
